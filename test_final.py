@@ -78,6 +78,8 @@
 
 
 import math
+# from machine import Pin
+import time
 
 # letters_map = {
 #     "A": [(4.27, 7.49), (2.93, 3.56), (3.06, 6.01), (5.82, 7.67), (6.78, 8.11), (3.8, 6.96), (4.82, 8.78), (7.81, 3.2), (8.57, 9.87), (5.19, 4.86), (4.73, 1.31), (7.86, 2.4), (5.86, 3.3), (5.65, 6.53), (1.73, 3.48)],
@@ -163,7 +165,78 @@ def find_angle(input_character):
         Print("Enter Valid Input")
 
 
-char_input = input("enter any letter : ")
+
+
+def draw_motor_angle(angle_motor1, angle_motor2):
+
+    #motor-1 
+    step_pin_motor1 = Pin(25, Pin.OUT)
+    dir_pin_motor1 = Pin(26, Pin.OUT)
+
+    #motor-2
+    step_pin_motor2 = Pin(27, Pin.OUT)
+    dir_pin_motor2 = Pin(14, Pin.OUT)
+
+    steps_per_revolution = 200
+    speed = 0.01
+    
+    direction_motor1 = 1
+    degrees_to_rotate_motor1 = angle_motor1
+    steps_to_rotate_motor1 = int((degrees_to_rotate_motor1 / 360) * steps_per_revolution)
+
+    dir_pin_motor1.value(direction_motor1)
+
+
+    direction_motor2 = 0
+    degrees_to_rotate_motor2 = angle_motor2
+    steps_to_rotate_motor2 = int((degrees_to_rotate_motor2 / 360) * steps_per_revolution)
+
+    dir_pin_motor2.value(direction_motor2)
+
+
+    if steps_to_rotate_motor1 > steps_to_rotate_motor2:
+        for i in range(steps_to_rotate_motor1):
+            step_pin_motor1.on()
+            time.sleep(speed)
+            step_pin_motor1.off()
+            time.sleep(speed)
+            if(i <= steps_to_rotate_motor2):
+                step_pin_motor2.on()
+                time.sleep(speed)
+                step_pin_motor2.off()
+                time.sleep(speed)
+            else:
+                step_pin_motor2.off()
+                time.sleep(speed)
+
+    else:
+        for i in range(steps_to_rotate_motor2):
+            step_pin_motor2.on()
+            time.sleep(speed)
+            step_pin_motor2.off()
+            time.sleep(speed)
+            if(i <= steps_to_rotate_motor1):
+                step_pin_motor1.on()
+                time.sleep(speed)
+                step_pin_motor1.off()
+                time.sleep(speed)
+            else:
+                step_pin_motor1.off()
+                time.sleep(speed)
+    
+    
+    step_pin_motor1.off()
+    dir_pin_motor1.off()
+    step_pin_motor2.off()
+    dir_pin_motor2.off()
+
+
+
+
+char_input = "A"
 angles = find_angle(char_input)
 print(angles)
+
+for i in angles:
+    draw_motor_angle(angles[i][0], angles[i][1])
 

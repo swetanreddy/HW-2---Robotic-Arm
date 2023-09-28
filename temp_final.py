@@ -1,3 +1,81 @@
+# from machine import Pin, I2C
+# import ssd1306
+
+# # ESP32 Pin assignment 
+# i2c = I2C(0, scl=Pin(22), sda=Pin(21))
+
+# oled_width = 128
+# oled_height = 64
+# oled = ssd1306.SSD1306_I2C(oled_width, oled_height, i2c)
+
+# oled.text('Hello, Wokwi!', 10, 10)      
+# oled.show()
+
+
+
+# import time
+
+# step_pin_motor1 = Pin(25, Pin.OUT)
+# dir_pin_motor1 = Pin(26, Pin.OUT)
+
+# steps_per_revolution = 200
+# speed = 0.01
+# direction_motor1 = 1
+# degrees_to_rotate_motor1 = 90
+# steps_to_rotate_motor1 = int((degrees_to_rotate_motor1 / 360) * steps_per_revolution)
+
+# dir_pin_motor1.value(direction_motor1)
+
+# step_pin_motor2 = Pin(27, Pin.OUT)
+# dir_pin_motor2 = Pin(14, Pin.OUT)
+
+# direction_motor2 = 0
+# degrees_to_rotate_motor2 = 45
+# steps_to_rotate_motor2 = int((degrees_to_rotate_motor2 / 360) * steps_per_revolution)
+
+# dir_pin_motor2.value(direction_motor2)
+
+# if steps_to_rotate_motor1 > steps_to_rotate_motor2:
+
+#     for i in range(steps_to_rotate_motor1):
+#         step_pin_motor1.on()
+#         time.sleep(speed)
+#         step_pin_motor1.off()
+#         time.sleep(speed)
+#         if(i <= steps_to_rotate_motor2):
+#             step_pin_motor2.on()
+#             time.sleep(speed)
+#             step_pin_motor2.off()
+#             time.sleep(speed)
+#         else:
+#             step_pin_motor2.off()
+#             time.sleep(speed)
+
+# else:
+
+#     for i in range(steps_to_rotate_motor2):
+#         step_pin_motor2.on()
+#         time.sleep(speed)
+#         step_pin_motor2.off()
+#         time.sleep(speed)
+#         if(i <= steps_to_rotate_motor1):
+#             step_pin_motor1.on()
+#             time.sleep(speed)
+#             step_pin_motor1.off()
+#             time.sleep(speed)
+#         else:
+#             step_pin_motor1.off()
+#             time.sleep(speed)
+
+
+
+
+# step_pin_motor1.off()
+# dir_pin_motor1.off()
+# step_pin_motor2.off()
+# dir_pin_motor2.off()
+
+
 # import math
 
 # letters_map = {
@@ -78,6 +156,8 @@
 
 
 import math
+from machine import Pin
+import time
 
 # letters_map = {
 #     "A": [(4.27, 7.49), (2.93, 3.56), (3.06, 6.01), (5.82, 7.67), (6.78, 8.11), (3.8, 6.96), (4.82, 8.78), (7.81, 3.2), (8.57, 9.87), (5.19, 4.86), (4.73, 1.31), (7.86, 2.4), (5.86, 3.3), (5.65, 6.53), (1.73, 3.48)],
@@ -144,7 +224,6 @@ def find_angle(input_character):
 
     if input_character == "A":
         values = coordinates_A
-        print(values[0][0], values[0][1])
         angle_values = []
         for i in range(len(values)):
             if str(values[i][0]) and str(values[i][1]) == "D":
@@ -154,8 +233,11 @@ def find_angle(input_character):
                 #servo lift function
                 pass
             else:
-                print(i)
-                theta1, theta2 = inverse_kinematics(values[i][0], values[i][1])
+                #shifting the origin
+                changed_x = values[i][0] - 10
+                changed_y = values[i][1] + 9
+                print("changed_x, changed_y", (changed_x, changed_y))
+                theta1, theta2 = inverse_kinematics(changed_x, changed_y)
                 angle_values.append((theta1, theta2))
 
         return angle_values
@@ -163,7 +245,227 @@ def find_angle(input_character):
         Print("Enter Valid Input")
 
 
-char_input = input("enter any letter : ")
+
+
+# def draw_motor_angle(angle_motor1, angle_motor2, direction_of_motor1, direction_of_motor2):
+
+#     #motor-1 
+#     step_pin_motor1 = Pin(27, Pin.OUT)
+#     dir_pin_motor1 = Pin(14, Pin.OUT)
+
+#     #motor-2
+#     step_pin_motor2 = Pin(25, Pin.OUT)
+#     dir_pin_motor2 = Pin(26, Pin.OUT)
+
+#     steps_per_revolution = 200
+#     speed = 0.01
+    
+#     print("(angle_motor1, angle_motor2)", (angle_motor1, angle_motor2))
+
+#     if angle_motor1 >= 90 :
+#         direction_motor1 = 1
+#         degrees_to_rotate_motor1 = angle_motor1 - 90
+        
+#     else:
+#         direction_motor1 = 0
+#         degrees_to_rotate_motor1 = 90 - angle_motor1
+        
+#     if angle_motor2 >= 90 : 
+#         direction_motor2 = 0
+#         degrees_to_rotate_motor2 = angle_motor2 - 90
+#         steps_to_rotate_motor2 = int((degrees_to_rotate_motor2 / 360) * steps_per_revolution)
+#     else:
+#         direction_motor2 = 1
+#         degrees_to_rotate_motor2 = 90 - angle_motor2
+#         steps_to_rotate_motor2 = int((degrees_to_rotate_motor2 / 360) * steps_per_revolution)
+
+#     steps_to_rotate_motor1 = int((degrees_to_rotate_motor1 / 360) * steps_per_revolution)
+#     steps_to_rotate_motor1 = int((degrees_to_rotate_motor1 / 360) * steps_per_revolution)
+#     dir_pin_motor1.value(direction_motor1)
+#     dir_pin_motor2.value(direction_motor2)
+
+#     print("current position: ", (degrees_to_rotate_motor1, degrees_to_rotate_motor2))
+
+#     if steps_to_rotate_motor1 > steps_to_rotate_motor2:
+#         for i in range(steps_to_rotate_motor1):
+#             step_pin_motor1.on()
+#             time.sleep(speed)
+#             step_pin_motor1.off()
+#             time.sleep(speed)
+#             if(i <= steps_to_rotate_motor2):
+#                 step_pin_motor2.on()
+#                 time.sleep(speed)
+#                 step_pin_motor2.off()
+#                 time.sleep(speed)
+#             else:
+#                 step_pin_motor2.off()
+#                 time.sleep(speed)
+
+#     else:
+#         for i in range(steps_to_rotate_motor2):
+#             step_pin_motor2.on()
+#             time.sleep(speed)
+#             step_pin_motor2.off()
+#             time.sleep(speed)
+#             if(i <= steps_to_rotate_motor1):
+#                 step_pin_motor1.on()
+#                 time.sleep(speed)
+#                 step_pin_motor1.off()
+#                 time.sleep(speed)
+#             else:
+#                 step_pin_motor1.off()
+#                 time.sleep(speed)
+    
+#     step_pin_motor1.off()
+#     dir_pin_motor1.off()
+#     step_pin_motor2.off()
+#     dir_pin_motor2.off()
+
+def draw_motor_angle(angle_motor1, angle_motor2, direction_of_motor1, direction_of_motor2):
+
+    #motor-1 
+    step_pin_motor1 = Pin(27, Pin.OUT)
+    dir_pin_motor1 = Pin(14, Pin.OUT)
+
+    #motor-2
+    step_pin_motor2 = Pin(25, Pin.OUT)
+    dir_pin_motor2 = Pin(26, Pin.OUT)
+
+    steps_per_revolution = 200
+    speed = 0.01
+    
+    steps_to_rotate_motor1 = int((angle_motor1 / 360) * steps_per_revolution)
+    steps_to_rotate_motor2 = int((angle_motor2 / 360) * steps_per_revolution)
+    dir_pin_motor1.value(direction_of_motor1)
+    dir_pin_motor2.value(direction_of_motor2)
+
+    print("current position: ", (angle_motor1, angle_motor2))
+
+    if steps_to_rotate_motor1 > steps_to_rotate_motor2:
+        for i in range(steps_to_rotate_motor1):
+            step_pin_motor1.on()
+            time.sleep(speed)
+            step_pin_motor1.off()
+            time.sleep(speed)
+            if(i <= steps_to_rotate_motor2):
+                step_pin_motor2.on()
+                time.sleep(speed)
+                step_pin_motor2.off()
+                time.sleep(speed)
+            else:
+                step_pin_motor2.off()
+                time.sleep(speed)
+
+    else:
+        for i in range(steps_to_rotate_motor2):
+            step_pin_motor2.on()
+            time.sleep(speed)
+            step_pin_motor2.off()
+            time.sleep(speed)
+            if(i <= steps_to_rotate_motor1):
+                step_pin_motor1.on()
+                time.sleep(speed)
+                step_pin_motor1.off()
+                time.sleep(speed)
+            else:
+                step_pin_motor1.off()
+                time.sleep(speed)
+    
+    step_pin_motor1.off()
+    dir_pin_motor1.off()
+    step_pin_motor2.off()
+    dir_pin_motor2.off()
+
+char_input = "A"
 angles = find_angle(char_input)
 print(angles)
+
+new_angles = []
+        
+for i in range(len(angles)):
+    if i == 0:
+        new_theta1 = angles[i][0] - 90
+        new_theta2 = angles[i][1] - 90
+        new_angles.append((new_theta1, new_theta2, 1, 0))
+
+    new_theta1 = angles[i][0]- angles[i-1][0]
+    new_theta2 = angles[i][1]- angles[i-1][1]
+
+    if new_theta1 > new_angles[i-1][0]:
+        direction1 = 1
+    else:
+        direction1 = 0
+
+    if new_theta2 > new_angles[i-1][1]:
+        direction2 = 0
+    else:
+        direction2 = 1
+
+    if new_theta1 < 0 :
+        new_theta1 = -(new_theta1)
+
+    if new_theta2 < 0 :
+        new_theta2 = -(new_theta2)
+    
+    new_angles.append((new_theta1, new_theta2, direction1, direction2))
+
+print("new angles", new_angles)
+
+for angle in new_angles:
+    # print(angle[0])
+    # print(angle[1])
+    # print(angle[2])
+    # print(angle[3])
+    draw_motor_angle(angle[0], angle[1], angle[2], angle[3])
+    time.sleep(1)
+        
+
+# for i in range(len(angles)):
+#     draw_motor_angle(angles[i][0], angles[i][1])
+#     time.sleep(1)
+
+
+# char_input = input("Input the character : ")
+
+# initial_x = 0
+# iniital_y = 27.492
+
+# if char_input == "A":
+#     coordinates = coordinates_A
+#     new_coordinates = []
+#     for i in coordinates:
+#         if i[0] == "D" or i[0] == "L":
+#             new_coordinates.append((i[0], i[1]))
+#         else:
+#             x_1 = i[0] - 10
+#             y_1 = i[1] + 9
+#             new_coordinates.append((x_1, y_1))
+#     print("New Coordinates : ", new_coordinates)
+
+#     current_theta1 = 0
+#     curremt_theta2 = 0
+
+#     for i in new_coordinates:
+#         if i[0] and i[1] == "D":
+#             #servo  drop function
+#             pass
+#         elif i[0] and i[1] == "L":
+#             #servo lift function
+#             pass
+#         else:
+#             theta1, theta2 = inverse_kinematics(i[0], i[1])
+#             if theta1 > 90:
+#                 theta1 = theta1 - 90
+#             else:
+#                 theta1 = 90 - theta1 
+#             if theta1 > current_theta1:
+#                 motor1_angle_to_move = theta1 + current_theta1
+#                 motor1_direction = 1
+#             else:
+#                 motor1_angle_to_move = 
+
+
+
+
+
 
