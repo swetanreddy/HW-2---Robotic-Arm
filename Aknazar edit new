@@ -1,0 +1,119 @@
+import time
+import math
+from machine import Pin
+
+letters_map = {
+ #   "A" : [(0.5, 0.5), (1.5, 3), (2.5, 5.5), (3.5, 8), (4.5, 5.5), (5.5, 3), (6.5, 0.5), (5.5, 3), (3.5, 3), (1.5, 3)],
+    "A" : [(1, 1), (3, 6), (5, 11), (7, 6), (9, 1), (7, 6), ((3, 6))],
+    "I" : [(0.5, 0.5), (0.5, 5), (0.5, 10), (0.5, 15), (4, 15), (8, 15), (12, 15)],
+#     "S" : [(1, 1), (5, 1), (9, 1), (9, 3.5), (9, 6), (5, 6), (1, 6), (1, 8.5), (1, 11), (5, 11), (9, 11)]
+}
+
+#motor-1 
+step_pin_motor1 = Pin(16, Pin.OUT)
+dir_pin_motor1 = Pin(17, Pin.OUT)
+
+motor1_ms1 = Pin(23, Pin.OUT)
+motor1_ms2 = Pin(22, Pin.OUT)
+
+motor2_ms1 = Pin(25, Pin.OUT)
+motor2_ms2 = Pin(26, Pin.OUT)
+
+# Initialize motor1 MS pins
+motor1_ms1.value(1)
+motor1_ms2.value(1)
+
+# Initialize motor2 MS pins
+motor2_ms1.value(1)
+motor2_ms2.value(1)
+
+#motor-2
+step_pin_motor2 = Pin(18, Pin.OUT)
+dir_pin_motor2 = Pin(19, Pin.OUT)
+
+m = 8
+n = m/2
+L1 = 16
+L2 = 20
+
+STEPS_PER_REVOLUTION = 1600
+SPEED = 0.001
+
+def inverse_kinematics(x, y):
+    R1 = math.sqrt(y**2 + (n - x)**2)
+    R2 = math.sqrt(y**2 + (n + x)**2)
+    
+    a1 = math.degrees(math.acos((L1**2 + R1**2 - L2**2) / (2 * L1 * R1))) 
+    a2 = math.degrees(math.acos((L1**2 + R2**2 - L2**2) / (2 * L1 * R2)))
+    
+    b1 = math.degrees(math.acos((m**2 + R1**2 - R2**2) / (2 * m * R1)))
+    b2 = math.degrees(math.acos((m**2 + R2**2 - R1**2) / (2 * m * R2)))
+        
+    theta1 = a1 + b1
+    theta2 = a2 + b2
+    
+    return theta1, theta2
+
+def find_angle(character, n):
+    values = letters_map[character]
+    angle_values = [(inverse_kinematics(value[0] - 10 + (n*5), value[1] + 10)) for value in values]
+    return angle_values
+
+def draw_motor_angle(angle_motor1, angle_motor2, direction1, direction2):
+    steps_to_rotate_motor1 = int((angle_motor1 / 360) * STEPS_PER_REVOLUTION)
+    steps_to_rotate_motor2 = int((angle_motor2 / 360) * STEPS_PER_REVOLUTION)
+    dir_pin_motor1.value(direction1)
+    dir_pin_motor2.value(direction2)
+
+    print("current position: ", (angle_motor1, angle_motor2, direction1, direction2))
+    max_steps = max(steps_to_rotate_motor1, steps_to_rotate_motor2)
+
+    for i in range(max_steps):
+        if i < steps_to_rotate_motor1:
+            step_pin_motor1.on()
+        if i < steps_to_rotate_motor2:
+            step_pin_motor2.on()
+        
+        time.sleep(SPEED)
+        step_pin_motor1.off()
+        step_pin_motor2.off()
+        time.sleep(SPEED)
+
+char_input = input("enter initials: ")
+input_initials = [char for char in char_input]
+print(input_initials)
+
+for i, initial in enumerate(input_initials):
+    angles = find_angle(initial, i)
+    angles.append((90, 90))
+    
+    print(angles)
+
+    new_angles = []
+    for i, angle in enumerate(angles):
+        if i == 0:
+            new_theta1 = angle[0] - 90
+            new_theta2 = angle[1] - 90
+            direction1 = 0 if angle[0] > 90 else 1
+            direction2 = 1 if angle[1] > 90 else 0
+            new_angles.append((new_theta1, new_theta2, direction1, direction2))
+        else:
+            new_theta1 = angle[0] - angles[i-1][0]
+            new_theta2 = angle[1] - angles[i-1][1]
+            
+            direction1 = 0 if new_theta1 > 0 else 1
+            direction2 = 1 if new_theta2 > 0 else 0
+            
+            new_theta1 = abs(new_theta1)
+            new_theta2 = abs(new_theta2)
+            new_angles.append((new_theta1, new_theta2, direction1, direction2))
+
+    print("new angles", new_angles)
+    for angle in new_angles:
+        draw_motor_angle(*angle)
+        time.sleep(0.1)
+
+step_pin_motor1.off()
+dir_pin_motor1.off()
+step_pin_motor2.off()
+dir_pin_motor2.off()
